@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="icon" href="Assets/favicon.png" type="image/x-icon">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTC | Digital Systems Workshop</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- MTC Typography -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Syntax Highlighting -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+
+    <style>
+        /* --- MTC BRAND SYSTEM --- */
+        :root {
+            --mtc-purple: #843B97;
+            --mtc-orange: #FF8C3C;
+            --mtc-charcoal: #414141;
+            --mtc-grey: #495965;
+            --md-background: #f8f9fa;
+            --md-surface: #ffffff;
+            --resistor-blue: #6495ED;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--md-background);
+            color: var(--mtc-charcoal);
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+
+        /* Utilities */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--mtc-purple), var(--mtc-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--mtc-purple), var(--mtc-orange));
+        }
+
+        .card {
+            background: var(--md-surface);
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(73, 89, 101, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* --- SIDEBAR SYSTEM --- */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            height: 100vh;
+            width: 500px;
+            background: white;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.2);
+            z-index: 50;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #hardwareSidebar {
+            left: 0;
+            transform: translateX(-500px);
+        }
+
+        #hardwareSidebar.active {
+            transform: translateX(0);
+        }
+
+        #softwareSidebar {
+            right: 0;
+            transform: translateX(500px);
+        }
+
+        #softwareSidebar.active {
+            transform: translateX(0);
+        }
+
+        /* Sidebar Handles */
+        .sidebar-handle {
+            position: absolute;
+            top: 50%;
+            width: 32px;
+            height: 60px;
+            background: var(--mtc-charcoal);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
+            transition: background 0.2s;
+            z-index: 60;
+        }
+
+        .sidebar-handle:hover {
+            background: var(--mtc-purple);
+        }
+
+        #handle-hw {
+            right: -32px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        #handle-sw {
+            left: -32px;
+            border-radius: 8px 0 0 8px;
+            box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Icon Animation */
+        .handle-icon {
+            transition: transform 0.4s ease;
+            stroke-width: 3px;
+        }
+
+        #hardwareSidebar.active #handle-hw .handle-icon {
+            transform: rotate(180deg);
+        }
+
+        #softwareSidebar.active #handle-sw .handle-icon {
+            transform: rotate(180deg);
+        }
+
+
+        /* --- LEVEL SELECTOR --- */
+        .level-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 40;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 0.75rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .lvl-btn {
+            padding: 6px 20px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--mtc-grey);
+            background: transparent;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .lvl-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .lvl-btn.active {
+            background: var(--mtc-charcoal);
+            color: white;
+            box-shadow: 0 4px 10px rgba(65, 65, 65, 0.3);
+        }
+
+        .lvl-content {
+            display: none;
+        }
+
+        body.lvl-1 .lvl-content.l1 {
+            display: block;
+        }
+
+        body.lvl-2 .lvl-content.l2 {
+            display: block;
+        }
+
+        body.lvl-3 .lvl-content.l3 {
+            display: block;
+        }
+
+        /* --- CODE TABS & WIRING --- */
+        .code-header {
+            background: #eef1f4;
+            padding: 8px 16px;
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid #dce2e8;
+            overflow-x: auto;
+        }
+
+        .code-tab {
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--mtc-grey);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .code-tab:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .code-tab.active {
+            background: white;
+            color: var(--mtc-purple);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Wiring Card */
+        .wiring-card {
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            height: 100%;
+        }
+
+        .wiring-placeholder-img {
+            width: 100%;
+            height: 100px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            border: 2px dashed #cbd5e1;
+        }
+
+        /* Briefing Card */
+        .briefing-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            border-left: 4px solid var(--mtc-purple);
+            height: 100%;
+        }
+
+        /* --- IMPROVED COMPONENT GRAPHICS --- */
+
+        /* 1. LED */
+        .led-graphic {
+            position: relative;
+            width: 60px;
+            height: 100px;
+        }
+
+        .led-dome {
+            width: 40px;
+            height: 50px;
+            background: #ef4444;
+            border-radius: 50px 50px 5px 5px;
+            margin: 0 auto;
+            box-shadow: inset -5px -5px 10px rgba(0, 0, 0, 0.2), 0 5px 10px rgba(239, 68, 68, 0.4);
+            border: 1px solid #b91c1c;
+            position: relative;
+            z-index: 10;
+        }
+
+        .led-dome::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 8px;
+            width: 8px;
+            height: 15px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            transform: rotate(20deg);
+        }
+
+        .led-leg {
+            background: #9ca3af;
+            width: 4px;
+            position: absolute;
+            top: 48px;
+        }
+
+        .leg-long {
+            height: 60px;
+            left: 24px;
+        }
+
+        .leg-short {
+            height: 45px;
+            left: 34px;
+        }
+
+        /* 2. RESISTORS */
+        .resistor-container {
+            width: 100%;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .wire-lead {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: #9ca3af;
+            z-index: 1;
+        }
+
+        .resistor-body {
+            position: relative;
+            z-index: 2;
+            width: 100px;
+            height: 24px;
+            background: linear-gradient(180deg, #8cb4f5 0%, #6495ED 50%, #4a7ec7 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid #4a7ec7;
+        }
+
+        .band {
+            width: 8px;
+            height: 100%;
+        }
+
+        /* 3. 7-SEGMENT DISPLAY (REMASTERED) */
+        .seven-seg-box {
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            width: 120px;
+            height: 160px;
+            position: relative;
+            margin: 0 auto;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .seg {
+            position: absolute;
+            background: #e5e7eb;
+            /* OFF State */
+            border-radius: 4px;
+            transition: all 0.3s;
+            box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Active State Simulation (Class to toggle later if needed, mostly for visual reference) */
+        .seg.active {
+            background: #ef4444;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+        }
+
+        .seg-h {
+            width: 44px;
+            height: 10px;
+            left: 38px;
+            clip-path: polygon(10% 0, 90% 0, 100% 50%, 90% 100%, 10% 100%, 0% 50%);
+        }
+
+        .seg-v {
+            width: 10px;
+            height: 44px;
+            clip-path: polygon(0 10%, 50% 0, 100% 10%, 100% 90%, 50% 100%, 0 90%);
+        }
+
+        .seg-a {
+            top: 15px;
+        }
+
+        .seg-b {
+            top: 22px;
+            right: 28px;
+        }
+
+        .seg-c {
+            bottom: 22px;
+            right: 28px;
+        }
+
+        .seg-d {
+            bottom: 15px;
+        }
+
+        .seg-e {
+            bottom: 22px;
+            left: 28px;
+        }
+
+        .seg-f {
+            top: 22px;
+            left: 28px;
+        }
+
+        .seg-g {
+            top: 75px;
+        }
+
+        .lbl {
+            position: absolute;
+            font-size: 10px;
+            color: #9ca3af;
+            font-family: 'Roboto Mono';
+            font-weight: bold;
+        }
+
+        pre code.hljs {
+            padding: 24px !important;
+            font-size: 1rem;
+            line-height: 1.6;
+            height: 100%;
+        }
+
+        .time-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #495965;
+            background: #e2e8f0;
+            padding: 6px 10px;
+            border-radius: 8px;
+        }
+
+        /* Flow Diagram */
+        .flow-node {
+            background: white;
+            border: 2px solid var(--mtc-charcoal);
+            color: var(--mtc-charcoal);
+            font-weight: 600;
+            font-size: 0.75rem;
+            padding: 8px 16px;
+            border-radius: 8px;
+            position: relative;
+            text-align: center;
+        }
+
+        .flow-arrow {
+            flex: 1;
+            height: 2px;
+            background: #cbd5e1;
+            position: relative;
+            margin: 0 8px;
+        }
+
+        .flow-arrow::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -3px;
+            width: 0;
+            height: 0;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+            border-left: 6px solid #cbd5e1;
+        }
+    </style>
+</head>
+
+<body class="pb-32 pt-24 lvl-1">
+
+    <!-- LEVEL SELECTOR -->
+    <div class="level-bar">
+        <div class="flex items-center gap-3">
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-2">Proficiency Level</span>
+            <button onclick="setLevel(1)" class="lvl-btn active" id="btn-lvl-1">Level 1: Apprentice</button>
+            <button onclick="setLevel(2)" class="lvl-btn" id="btn-lvl-2">Level 2: Engineer</button>
+            <button onclick="setLevel(3)" class="lvl-btn" id="btn-lvl-3">Level 3: Architect</button>
+        </div>
+    </div>
+
+    <!-- ================= HARDWARE SIDEBAR (LEFT) ================= -->
+    <aside id="hardwareSidebar" class="sidebar">
+        <div id="handle-hw" class="sidebar-handle" onclick="toggleSidebar('hardwareSidebar')">
+            <svg class="handle-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </div>
+
+        <div class="p-6 bg-[#414141] text-white shadow-md">
+            <h3 class="font-bold text-lg tracking-wide">Hardware Specs</h3>
+        </div>
+
+        <div class="p-4 space-y-4 overflow-y-auto">
+            <!-- 1. ROW: LED & RESISTOR -->
+            <div class="grid grid-cols-2 gap-4">
+                <!-- LED -->
+                <div class="card p-4 border-l-4 border-yellow-500 flex flex-col items-center">
+                    <h4 class="text-[10px] font-bold text-gray-500 uppercase mb-3 w-full text-left">LED Polarity</h4>
+                    <div class="led-graphic">
+                        <div class="led-dome"></div>
+                        <div class="led-leg leg-long"></div>
+                        <div class="led-leg leg-short"></div>
+                    </div>
+                    <div class="text-[10px] font-mono text-center mt-2 text-gray-600">
+                        Long (+)<br>Short (-)
+                    </div>
+                </div>
+
+                <!-- RESISTORS -->
+                <div class="card p-4 border-l-4 border-blue-500">
+                    <h4 class="text-[10px] font-bold text-gray-500 uppercase mb-3">Resistors</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <span class="block text-[10px] font-bold mb-1">220Ω (LED)</span>
+                            <div class="resistor-container">
+                                <div class="wire-lead"></div>
+                                <div class="resistor-body">
+                                    <div class="band bg-red-600"></div>
+                                    <div class="band bg-red-600"></div>
+                                    <div class="band bg-black"></div>
+                                    <div class="band bg-black"></div>
+                                    <div class="band bg-[#8B4513]"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-bold mb-1">10kΩ (Button)</span>
+                            <div class="resistor-container">
+                                <div class="wire-lead"></div>
+                                <div class="resistor-body">
+                                    <div class="band bg-[#8B4513]"></div>
+                                    <div class="band bg-black"></div>
+                                    <div class="band bg-black"></div>
+                                    <div class="band bg-red-600"></div>
+                                    <div class="band bg-[#8B4513]"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 7-SEGMENT DISPLAY -->
+            <div class="card p-5 border-l-4 border-purple-500">
+                <h4 class="text-xs font-bold text-gray-500 uppercase mb-4">7-Segment (Common Anode)</h4>
+
+                <div class="seven-seg-box">
+                    <div class="seg seg-h seg-a"></div> <span class="lbl"
+                        style="top:2px; left:50%; transform:translateX(-50%);">A</span>
+                    <div class="seg seg-v seg-b"></div> <span class="lbl" style="top:35px; right:15px;">B</span>
+                    <div class="seg seg-v seg-c"></div> <span class="lbl" style="bottom:35px; right:15px;">C</span>
+                    <div class="seg seg-h seg-d"></div> <span class="lbl"
+                        style="bottom:2px; left:50%; transform:translateX(-50%);">D</span>
+                    <div class="seg seg-v seg-e"></div> <span class="lbl" style="bottom:35px; left:15px;">E</span>
+                    <div class="seg seg-v seg-f"></div> <span class="lbl" style="top:35px; left:15px;">F</span>
+                    <div class="seg seg-h seg-g"></div> <span class="lbl" style="top:70px; right:12px;">G</span>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <div class="text-xs font-mono text-gray-600 bg-gray-100 p-2 rounded mb-2 border border-gray-200">
+                        COMMON PIN: <strong>3 & 8</strong> → 5V
+                    </div>
+                    <div class="text-[10px] text-purple-700 font-bold bg-purple-50 p-1 rounded">
+                        LOGIC: WRITE LOW = ON
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ================= SOFTWARE SIDEBAR (RIGHT) ================= -->
+    <aside id="softwareSidebar" class="sidebar">
+        <div id="handle-sw" class="sidebar-handle" onclick="toggleSidebar('softwareSidebar')">
+            <svg class="handle-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+            </svg>
+        </div>
+
+        <div class="p-6 bg-[#414141] text-white shadow-md">
+            <h3 class="font-bold text-lg tracking-wide">Arduino Reference</h3>
+        </div>
+        <div class="flex-1 w-full bg-white">
+            <iframe src="https://www.arduino.cc/reference/en/" class="w-full h-full border-none"
+                title="Arduino Documentation"></iframe>
+        </div>
+    </aside>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <header class="max-w-5xl mx-auto px-8 mb-12">
+        <div class="flex flex-col md:flex-row md:items-center gap-8 mb-8 border-b pb-8">
+            <img src="Assets/MTC.png" alt="MTC Logo" class="h-20 w-auto object-contain"
+                onerror="this.style.display='none'">
+            <div class="h-16 w-1 bg-gray-200 rounded hidden md:block"></div>
+            <div>
+                <h1 class="text-4xl font-extrabold tracking-tight text-[#414141] mb-1">
+                    Digital Systems & <span class="gradient-text">Elevator Logic</span>
+                </h1>
+                <p class="text-[#495965] font-light text-lg">
+                    Mastering Input, Output, and Non-blocking Control Flow.
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-8 space-y-12">
+
+        <!-- CHECKPOINT 1 -->
+        <section id="checkpoint-1" class="relative pl-8 border-l-2 border-gray-200">
+            <span
+                class="absolute -left-[17px] top-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#414141] text-white text-sm font-bold shadow-lg ring-4 ring-white">1</span>
+
+            <div class="card p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Hello World (Outputs)</h2>
+                    <span class="time-badge">Time: 10 MIN</span>
+                </div>
+
+                <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="code-header">
+                        <button onclick="switchActivity(1, 'blink')" class="code-tab active" data-group="1"
+                            data-act="blink">Activity A: Standard Blink</button>
+                        <button onclick="switchActivity(1, 'sos')" class="code-tab" data-group="1"
+                            data-act="sos">Activity B: SOS Loop</button>
+                    </div>
+
+                    <div class="bg-[#282c34] text-sm p-6">
+                        <!-- ACTIVITY A -->
+                        <div id="c1-blink" class="act-content group-1 block space-y-4">
+                            <!-- TOP ROW: Schematic + Briefing -->
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="col-span-1 wiring-card">
+                                    <h5 class="text-xs font-bold text-gray-800 uppercase mb-2">Schematic</h5>
+                                    <div class="wiring-placeholder-img">
+                                        <img src="Assets/wiring_led.png" onerror="this.style.display='none'"
+                                            class="h-full object-contain">
+                                        <span class="text-xs text-gray-400">Pin 4 → 220Ω → LED(+)</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 font-mono">220Ω = Red-Red-Blk-Blk-Brn</p>
+                                </div>
+                                <div class="col-span-2 briefing-card">
+                                    <h5 class="text-xs font-bold text-purple-700 uppercase mb-3">Mission Briefing</h5>
+                                    <div class="space-y-3 text-sm text-gray-600 leading-relaxed">
+                                        <p><strong>The Objective:</strong> Control electricity manually. We need to tell
+                                            the Arduino chip exactly which leg (Pin) to use and which direction current
+                                            should flow.</p>
+                                        <p><strong>Thought Process:</strong>
+                                        <ol class="list-decimal ml-5 space-y-1 text-xs">
+                                            <li><strong>Setup:</strong> "Hey Arduino, Pin 4 is for SENDING power
+                                                (Output)."</li>
+                                            <li><strong>Loop:</strong> "Turn Pin 4 HIGH (5 Volts)."</li>
+                                            <li><strong>Wait:</strong> "Freeze the brain for 1000ms."</li>
+                                            <li><strong>Loop:</strong> "Turn Pin 4 LOW (0 Volts)."</li>
+                                        </ol>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BOTTOM ROW: Code -->
+                            <div class="lvl-content l1">
+                                <pre><code class="language-cpp">// TASK: Blink the LED on Pin 4.
+void setup() {
+  // CONFIG: Syntax pinMode(pin, mode);
+  // Tell Arduino that Pin 4 is an OUTPUT.
+  pinMode(____, ____); 
+}
+
+void loop() {
+  // 1. Turn LED ON (High Voltage / 5V)
+  digitalWrite(____, ____); 
+  
+  // 2. Wait 1 second (1000ms)
+  delay(1000);           
+  
+  // 3. Turn LED OFF (Low Voltage / GND)
+  digitalWrite(____, ____); 
+  
+  // 4. Wait 1 second
+  delay(1000);           
+}</code></pre>
+                            </div>
+                            <div class="lvl-content l2">
+                                <pre><code class="language-cpp">// LEVEL 2: Write the logic yourself.
+// Remember the structure: Setup runs once, Loop runs forever.
+
+void setup() {
+  // Initialize Pin 4 as an Output
+}
+void loop() {
+  // Blink the LED ON and OFF with 1 second intervals.
+}</code></pre>
+                            </div>
+                            <div class="lvl-content l3">
+                                <pre><code class="language-cpp">// CHALLENGE: Use variables `int ledPin = 4;`
+// Create a blink pattern that speeds up every loop.
+// Hint: You can modify a variable inside the loop.
+</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- ACTIVITY B -->
+                        <div id="c1-sos" class="act-content group-1 hidden space-y-4">
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="col-span-1 wiring-card">
+                                    <h5 class="text-xs font-bold text-gray-800 uppercase mb-2">Schematic</h5>
+                                    <div class="wiring-placeholder-img">Same as Activity A</div>
+                                </div>
+                                <div class="col-span-2 briefing-card">
+                                    <h5 class="text-xs font-bold text-purple-700 uppercase mb-2">Sequence Logic</h5>
+                                    <p class="text-sm text-gray-600 mb-2">
+                                        Computers are great at repeating tasks. A loop runs top-to-bottom, then
+                                        restarts.
+                                    </p>
+                                    <p class="text-xs text-gray-500 font-mono">
+                                        Pattern: S (Short-Short-Short) -> Wait -> O (Long-Long-Long) -> Wait -> S
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="lvl-content l1">
+                                <pre><code class="language-cpp">// SOS: 3 Short (200ms), 3 Long (600ms), 3 Short.
+void loop() {
+  // --- S (Short) ---
+  digitalWrite(4, HIGH); delay(200); digitalWrite(4, LOW); delay(200);
+  digitalWrite(4, HIGH); delay(200); digitalWrite(4, LOW); delay(200);
+  digitalWrite(4, HIGH); delay(200); digitalWrite(4, LOW); delay(200);
+  
+  delay(1000); // Pause
+  
+  // --- O (Long) ---
+  // FILL IN CODE FOR 3 LONG BLINKS
+  ____
+  ____
+  ____
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- CHECKPOINT 2 -->
+        <section id="checkpoint-2" class="relative pl-8 border-l-2 border-gray-200">
+            <span
+                class="absolute -left-[17px] top-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#843B97] text-white text-sm font-bold shadow-lg ring-4 ring-white">2</span>
+            <div class="card p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Inputs, Logic & Pull-Ups</h2>
+                    <span class="time-badge">Time: 15 MIN</span>
+                </div>
+
+                <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="code-header">
+                        <button onclick="switchActivity(2, 'momentary')" class="code-tab active" data-group="2"
+                            data-act="momentary">A: Pull-Down (Resistor)</button>
+                        <button onclick="switchActivity(2, 'pullup')" class="code-tab" data-group="2"
+                            data-act="pullup">B: Input Pullup (Internal)</button>
+                        <button onclick="switchActivity(2, 'gates')" class="code-tab" data-group="2" data-act="gates">C:
+                            Logic Gates</button>
+                    </div>
+                    <div class="bg-[#282c34] text-sm p-6">
+
+                        <!-- ACTIVITY A: MOMENTARY -->
+                        <div id="c2-momentary" class="act-content group-2 block space-y-4">
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="col-span-1 wiring-card">
+                                    <h5 class="text-xs font-bold text-gray-800 uppercase mb-2">Wiring</h5>
+                                    <div class="wiring-placeholder-img">Btn + 10kΩ</div>
+                                    <p class="text-xs text-gray-500 font-mono">10kΩ = Brn-Blk-Blk-Red-Brn</p>
+                                </div>
+                                <div class="col-span-2 briefing-card">
+                                    <h5 class="text-xs font-bold text-purple-700 uppercase mb-2">The "Floating" Pin
+                                        Concept</h5>
+                                    <div class="space-y-2 text-sm text-gray-600">
+                                        <p><strong>Problem:</strong> If a wire isn't connected to 5V or Ground, it acts
+                                            like an antenna. It picks up static electricity from the air, causing the
+                                            Arduino to read random 1s and 0s.</p>
+                                        <p><strong>Solution:</strong> The <strong>Pull-Down Resistor</strong> "ties" the
+                                            wire to Ground (0V) when the button is open. When you press the button, the
+                                            direct connection to 5V overrides the weak resistor connection.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="lvl-content l1">
+                                <pre><code class="language-cpp">// STANDARD INPUT (Pressed = 5V/HIGH)
+void setup() {
+  pinMode(4, OUTPUT); 
+  pinMode(2, ____);   // Input or Output?
+}
+
+void loop() {
+  // Read the state of the pin (Is it 5V or 0V?)
+  int state = digitalRead(2); 
+  
+  if (state == ____) { // Is pressed HIGH or LOW?
+    digitalWrite(4, HIGH); 
+  } else {
+    digitalWrite(4, ____); 
+  }
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- ACTIVITY B: INPUT PULLUP -->
+                        <div id="c2-pullup" class="act-content group-2 hidden space-y-4">
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="col-span-1 wiring-card">
+                                    <h5 class="text-xs font-bold text-purple-700 uppercase mb-2">No Resistor!</h5>
+                                    <div class="wiring-placeholder-img">Btn → GND</div>
+                                </div>
+                                <div class="col-span-2 briefing-card">
+                                    <h5 class="text-xs font-bold text-purple-700 uppercase mb-2">Internal Pull-Up</h5>
+                                    <p class="text-sm text-gray-600 mb-2">
+                                        The Arduino has tiny resistors built inside the chip. We can turn them on using
+                                        software!
+                                    </p>
+                                    <p class="text-xs bg-purple-100 p-2 rounded text-purple-900 font-bold">
+                                        WARNING: LOGIC IS INVERTED!<br>
+                                        Default State = HIGH (5V)<br>
+                                        Pressed State = LOW (GND)
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="lvl-content l1">
+                                <pre><code class="language-cpp">// INTERNAL PULLUP (Pressed = GND/LOW)
+void setup() {
+  pinMode(4, OUTPUT);
+  // Activate Internal 20k Resistor connected to 5V
+  pinMode(2, INPUT_PULLUP); 
+}
+
+void loop() {
+  int state = digitalRead(2);
+  
+  // LOGIC FLIPPED: LOW means Pressed!
+  if (state == ____) { 
+    digitalWrite(4, HIGH); 
+  } else {
+    digitalWrite(4, LOW);  
+  }
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- ACTIVITY C: LOGIC GATES -->
+                        <div id="c2-gates" class="act-content group-2 hidden space-y-4">
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="col-span-1 wiring-card">
+                                    <h5 class="text-xs font-bold text-gray-800 uppercase mb-2">2 Buttons</h5>
+                                    <div class="wiring-placeholder-img">Btn A (Pin 2) & Btn B (Pin 3)</div>
+                                </div>
+                                <div class="col-span-2 briefing-card">
+                                    <h5 class="text-xs font-bold text-purple-700 uppercase mb-2">Safety Logic (AND Gate)
+                                    </h5>
+                                    <p class="text-sm text-gray-600">
+                                        In industrial machines (like paper cutters), you often need to press TWO buttons
+                                        at once to operate it. This keeps both hands safe.
+                                    </p>
+                                    <p class="text-xs font-mono mt-2 text-gray-500">
+                                        IF (Button A is Pressed) AND (Button B is Pressed) -> RUN
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="lvl-content l1">
+                                <pre><code class="language-cpp">// AND GATE: Output HIGH only if A && B are HIGH
+void loop() {
+  int a = digitalRead(2);
+  int b = digitalRead(3);
+  
+  // The '&&' symbol means AND
+  if (a == HIGH && b == HIGH) {
+    digitalWrite(4, HIGH);
+  } else {
+    digitalWrite(4, LOW);
+  }
+}
+// CHALLENGE: Change '&&' to '||' for OR Gate.</code></pre>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- CHECKPOINT 3: 7 SEGMENT -->
+        <section id="checkpoint-3" class="relative pl-8 border-l-2 border-gray-200">
+            <span
+                class="absolute -left-[17px] top-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#FF8C3C] text-white text-sm font-bold shadow-lg ring-4 ring-white">3</span>
+            <div class="card p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">7-Segment Display</h2>
+                    <span class="time-badge">Time: 15 MIN</span>
+                </div>
+
+                <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="bg-[#282c34] text-sm p-6 space-y-4">
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="col-span-1 wiring-card">
+                                <h5 class="text-xs font-bold text-gray-800 uppercase mb-2">Full Bus</h5>
+                                <div class="wiring-placeholder-img">7-Seg Pins → Arduino 2-8</div>
+                                <p class="text-[10px] text-gray-500">Common Anode</p>
+                            </div>
+                            <div class="col-span-2 briefing-card">
+                                <h5 class="text-xs font-bold text-purple-700 uppercase mb-2">Water Analogy (Common
+                                    Anode)</h5>
+                                <div class="text-sm text-gray-600 space-y-2">
+                                    <p>Think of electricity like water flowing from high to low. The "Common" pin
+                                        connects to the top of the waterfall (5V).</p>
+                                    <p>To make current flow through a segment (LED), we must connect the bottom pin to
+                                        Ground (LOW).</p>
+                                    <p><strong>If we connect the bottom pin to 5V (HIGH), the water is level—no
+                                            flow!</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lvl-content l1">
+                            <pre><code class="language-cpp">// Draw the Number '1' (Segments B and C)
+void loop() {
+  // REMEMBER: LOW = ON
+  digitalWrite(3, ____); // Seg B
+  digitalWrite(4, ____); // Seg C
+  
+  // Turn off everything else (HIGH)
+  digitalWrite(2, HIGH); // Seg A
+  // ...
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CHECKPOINT 4 (Conceptual) -->
+        <section id="checkpoint-4" class="relative pl-8 border-l-2 border-gray-200">
+            <span
+                class="absolute -left-[17px] top-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#495965] text-white text-sm font-bold shadow-lg ring-4 ring-white">4</span>
+            <div class="card p-6 border-t-4 border-gray-500">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-gray-800">Concept: The Time Trap</h2>
+                    <span class="time-badge">Time: 5 MIN</span>
+                </div>
+                <p class="text-sm text-gray-600 mt-2">
+                    <strong>Lecture Phase:</strong> Understand why <code>delay()</code> pauses the entire brain of the
+                    Arduino, making elevators dangerous. We use <code>millis()</code> (Stopwatch) logic for the final
+                    project.
+                </p>
+            </div>
+        </section>
+
+        <!-- CHECKPOINT 5: THE FINAL PROJECT -->
+        <section id="checkpoint-5" class="pt-8">
+            <div class="card overflow-hidden shadow-2xl mb-12">
+                <!-- Gradient Header -->
+                <div class="gradient-bg p-8 text-white relative overflow-hidden">
+                    <div class="relative z-10 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-4xl font-extrabold uppercase tracking-widest mb-1">Final Project</h2>
+                            <p class="text-white/80 font-mono text-sm">Elevator Control System v1.0</p>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur-sm border border-white/30 px-6 py-3 rounded-xl">
+                            <span class="block text-[10px] font-bold uppercase tracking-widest opacity-80">Time
+                                Budget</span>
+                            <span class="text-2xl font-bold">40 MIN</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logic Diagram -->
+                <div class="bg-gray-50 p-8 border-b border-gray-200">
+                    <h5 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 text-center">System Logic
+                        Flow</h5>
+                    <div class="flex flex-col md:flex-row items-center justify-center gap-2 max-w-4xl mx-auto">
+                        <div class="flow-node border-purple-500 text-purple-700">READ INPUTS<br><span
+                                class="text-[9px] font-normal text-gray-500">Buttons / Serial</span></div>
+                        <div class="flow-arrow"></div>
+                        <div class="flow-node border-gray-800">DECIDE<br><span
+                                class="text-[9px] font-normal text-gray-500">Compare Target vs Current</span></div>
+                        <div class="flow-arrow"></div>
+                        <div class="flow-node border-orange-500 text-orange-700">ACT<br><span
+                                class="text-[9px] font-normal text-gray-500">Move Motor / Update Display</span></div>
+                    </div>
+                </div>
+
+                <!-- Main Work Area -->
+                <div class="p-8 grid lg:grid-cols-3 gap-8">
+                    <!-- Left: Logic List Card -->
+                    <div class="col-span-1 space-y-6">
+                        <div class="wiring-card items-start text-left bg-purple-50 border-purple-100 h-auto">
+                            <h5 class="text-xs font-bold text-purple-800 uppercase mb-2">Track A: Physical</h5>
+                            <ul class="text-xs space-y-2 text-purple-900 list-disc ml-4">
+                                <li><strong>Input:</strong> 3 Floor Buttons</li>
+                                <li><strong>Sensor:</strong> 3 Reed Switches</li>
+                                <li><strong>Output:</strong> L298N Motor + 7-Seg</li>
+                                <li><strong>Goal:</strong> Move motor until Magnet hits Reed Switch.</li>
+                            </ul>
+                        </div>
+
+                        <div class="wiring-card items-start text-left bg-orange-50 border-orange-100 h-auto">
+                            <h5 class="text-xs font-bold text-orange-800 uppercase mb-2">Track B: Virtual</h5>
+                            <ul class="text-xs space-y-2 text-orange-900 list-disc ml-4">
+                                <li><strong>Input:</strong> Serial Commands</li>
+                                <li><strong>Protocol:</strong> <code>M_UP</code>, <code>M_DOWN</code></li>
+                                <li><strong>Feedback:</strong> Read '1', '2', '3' chars.</li>
+                                <li><strong>Goal:</strong> Parse Serial to control virtual lift.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Right: Editor -->
+                    <div
+                        class="col-span-2 border border-gray-200 rounded-xl overflow-hidden shadow-sm h-[500px] flex flex-col">
+                        <div class="code-header bg-[#282c34] border-none text-white py-2">
+                            <span class="text-xs font-bold tracking-widest">MASTER_TEMPLATE.INO</span>
+                        </div>
+                        <div class="bg-[#282c34] flex-1 overflow-auto">
+                            <div class="lvl-content l1 h-full">
+                                <pre><code class="language-cpp">// FINAL PROJECT MASTER TEMPLATE
+int currentFloor = 1;
+int targetFloor = 1;
+
+void setup() {
+  pinMode(2, INPUT); // Floor 1 Btn
+  Serial.begin(9600); // For Track B
+}
+
+void loop() {
+  // 1. READ INPUTS
+  if (digitalRead(2) == HIGH) targetFloor = 1;
+  // ... check other buttons
+  
+  // 2. LOGIC & MOTION
+  if (targetFloor > currentFloor) {
+    // TRACK A: digitalWrite(motorUp, HIGH);
+    // TRACK B:
+    Serial.println("M_UP");
+  } else if (targetFloor == currentFloor) {
+    // TRACK A: digitalWrite(motorUp, LOW);
+    // TRACK B:
+    Serial.println("M_STOP");
+  }
+  
+  // 3. SENSOR FEEDBACK (Track B Example)
+  if (Serial.available() > 0) {
+    char sensor = Serial.read(); // Read '1', '2', or '3'
+    if (sensor == '1') currentFloor = 1;
+    // ... check others
+  }
+  
+  // 4. UPDATE DISPLAY
+  // Call your 7-Seg function here
+}</code></pre>
+                            </div>
+                            <div class="lvl-content l2 h-full">
+                                <pre><code class="language-cpp">// ENGINEER LEVEL
+// Implement the Elevator State Machine.
+
+void loop() {
+  // 1. Check Buttons -> Update 'targetFloor'
+  
+  // 2. Motion Logic:
+  //    If Target > Current -> Go Up
+  //    If Target < Current -> Go Down
+  //    If Target == Current -> Stop
+  
+  // 3. Position Feedback:
+  //    Check Reed Switches OR Serial.read()
+  //    Update 'currentFloor' when sensor triggers.
+  
+  // 4. Display Update
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-12 text-gray-400 text-xs">
+        McMaster Technology Club | 2026 Engineering Dept
+    </footer>
+
+    <script>
+        // Syntax Highlight
+        hljs.highlightAll();
+
+        // Level Logic
+        function setLevel(lvl) {
+            document.body.className = `pb-32 pt-24 lvl-${lvl}`;
+            document.querySelectorAll('.lvl-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-lvl-${lvl}`).classList.add('active');
+        }
+
+        // Tab Logic
+        function switchActivity(group, act) {
+            document.querySelectorAll(`.code-tab[data-group="${group}"]`).forEach(b => {
+                b.classList.toggle('active', b.dataset.act === act);
+            });
+            document.querySelectorAll(`.act-content.group-${group}`).forEach(el => {
+                if (el.id === `c${group}-${act}`) {
+                    el.classList.remove('hidden');
+                    el.classList.add('block');
+                } else {
+                    el.classList.add('hidden');
+                    el.classList.remove('block');
+                }
+            });
+        }
+
+        // Sidebar Toggle
+        function toggleSidebar(id) {
+            const el = document.getElementById(id);
+            const isOpen = el.classList.contains('active');
+            // Close all
+            document.querySelectorAll('.sidebar').forEach(s => s.classList.remove('active'));
+            // Toggle requested
+            if (!isOpen) el.classList.add('active');
+        }
+    </script>
+</body>
+
+</html>
