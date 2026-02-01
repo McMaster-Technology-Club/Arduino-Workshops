@@ -151,6 +151,7 @@
             padding: 0.75rem;
             display: flex;
             justify-content: center;
+            align-items: center;
             gap: 0.5rem;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
@@ -282,14 +283,17 @@
             width: 50px;
             height: 60px;
             background-color: #EF5350;
+            /* Flat Material Red 400 */
             border-radius: 50% 50% 10% 10%;
             margin: 0 auto;
             position: relative;
             z-index: 10;
+            /* No shadows, no gradients, no reflections */
         }
 
         .led-leg {
             background-color: #BDBDBD;
+            /* Flat Material Grey 400 */
             width: 5px;
             position: absolute;
             top: 40px;
@@ -322,6 +326,7 @@
             width: 100%;
             height: 3px;
             background-color: #BDBDBD;
+            /* Flat Material Grey 400 */
             z-index: 1;
         }
 
@@ -330,13 +335,18 @@
             z-index: 2;
             width: 110px;
             height: 26px;
+            /* Flat Blue for Metal Film */
             background-color: #90CAF9;
+            /* Flat Material Blue 200 */
             border-radius: 13px;
+            /* Pill shape */
             display: flex;
             align-items: center;
             justify-content: space-evenly;
+            /* No shadows */
         }
 
+        /* Bands - Flat colors */
         .band {
             width: 9px;
             height: 100%;
@@ -405,6 +415,16 @@
             <button onclick="setLevel(2)" class="lvl-btn" id="btn-lvl-2">Level 2: Engineer</button>
             <button onclick="setLevel(3)" class="lvl-btn" id="btn-lvl-3">Level 3: Architect</button>
         </div>
+
+        <!-- NEW: Header Download Button -->
+        <a href="https://github.com/McMaster-Technology-Club/Arduino-Workshops/raw/refs/heads/main/MTC%20Elevator%20Simulator.zip"
+            class="absolute right-6 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2 px-4 rounded-full transition flex items-center gap-2 shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            Get Simulator
+        </a>
     </div>
 
     <!-- ================= HARDWARE SIDEBAR (LEFT) ================= -->
@@ -1021,8 +1041,8 @@ void loop() {
                 <!-- Main Work Area -->
                 <div class="p-8 grid lg:grid-cols-3 gap-8">
                     <!-- Left: Logic List Card -->
-                    <div class="col-span-1 space-y-6">
-                        <div class="wiring-card items-start text-left bg-purple-50 border-purple-100 h-auto">
+                    <div class="col-span-1 space-y-6 flex flex-col h-full">
+                        <div class="wiring-card items-start text-left bg-purple-50 border-purple-100 flex-1">
                             <h5 class="text-sm font-bold text-purple-800 uppercase mb-2">Physical Stream</h5>
                             <ul class="text-sm space-y-2 text-purple-900 list-disc ml-4">
                                 <li><strong>Input:</strong> 3 Floor Buttons</li>
@@ -1032,7 +1052,7 @@ void loop() {
                             </ul>
                         </div>
 
-                        <div class="wiring-card items-start text-left bg-orange-50 border-orange-100 h-auto">
+                        <div class="wiring-card items-start text-left bg-orange-50 border-orange-100 flex-1">
                             <h5 class="text-sm font-bold text-orange-800 uppercase mb-2">Virtual Stream</h5>
                             <ul class="text-sm space-y-2 text-orange-900 list-disc ml-4">
                                 <li><strong>Sending:</strong> <br> Logic mirrors Physical Stream exactly.
@@ -1054,13 +1074,12 @@ void loop() {
                                     </div>
                                 </li>
                             </ul>
-
                         </div>
                     </div>
 
                     <!-- Right: Editor -->
                     <div
-                        class="col-span-2 border border-gray-200 rounded-xl overflow-hidden shadow-sm h-[500px] flex flex-col">
+                        class="col-span-2 border border-gray-200 rounded-xl overflow-hidden shadow-sm h-full flex flex-col">
                         <div class="code-header bg-[#282c34] border-none text-white py-2">
                             <span class="text-xs font-bold tracking-widest">MASTER_TEMPLATE.INO</span>
                         </div>
